@@ -13,8 +13,8 @@ import httpx
 # ⚙️ Config
 # =========================
 # IMPORTANT: Replace with your actual token and chat ID, or set them as environment variables.
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "YOUR_TELEGRAM_TOKEN"  )
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8277544471:AAGhVkgju8P3a06fNh87lN679JnPa6RkcwI"  )
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7778420928")
 LOG_FILE = "multi_timeframe_signals_log.csv"
 
 # Concurrency setting: How many symbols to scan at the same time.

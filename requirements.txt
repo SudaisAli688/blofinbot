@@ -1,0 +1,6 @@
+ccxt
+ccxt.pro
+pandas
+mplfinance
+matplotlib
+httpx

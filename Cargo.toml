@@ -11,5 +11,5 @@ serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 
 [[bin]]
-name = "solana-dex-scanner"
-path = "solana-dex-scanner/src/main.rs"  # 👈 CHANGE "solana-dex-scanner" to your subfolder name!
+name = "blofinbot"
+path = "blofinbot/src/main.rs"  # 👈 CHANGE "solana-dex-scanner" to your subfolder name!

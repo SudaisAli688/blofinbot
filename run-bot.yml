@@ -1,0 +1,75 @@
+name: Run Solana Bot Daemon
+
+on:
+  workflow_dispatch: # Allows manual trigger to start scanning
+  schedule:
+    - cron: '0 */6 * * *' # Optional: automatically restarts every 6 hours
+
+jobs:
+  run-scanner:
+    name: Run Scanner Daemon
+    runs-on: ubuntu-latest
+    timeout-minutes: 355 # GitHub Actions maximum is 360 mins (6 hours)
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
+    - name: Cache cargo dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-run-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-run-
+
+    - name: Restore history file if exists
+      uses: actions/cache/restore@v3
+      id: history-cache
+      with:
+        path: alert_history.json
+        key: ${{ runner.os }}-alert-history-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-alert-history-
+
+    - name: Create config.json from GitHub Secrets
+      run: |
+        cat <<EOF > config.json
+        {
+          "telegram_token": "${{ secrets.TELEGRAM_TOKEN }}",
+          "telegram_chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}",
+          "poll_interval_seconds": 15,
+          "min_liquidity_usd": 1000.0,
+          "min_volume_usd_h1": 500.0,
+          "min_volume_usd_m5": 100.0,
+          "min_market_cap_usd": 5000.0,
+          "max_pair_age_hours": 24.0,
+          "min_buys_m5": 0,
+          "min_txns_m5": 0,
+          "web_port": 8080
+        }
+        EOF
+
+    - name: Run Solana DexScreener Scanner
+      run: |
+        # Run cargo build first so compiling doesn't eat into runtime limits
+        cargo build --release
+        
+        # Run scanner. It will run in an infinite loop. 
+        # Since GitHub actions will terminate it after 355 minutes, we allow it to scan.
+        timeout 350m ./target/release/solana-dex-scanner || true
+
+    - name: Save updated alert history to GitHub cache
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: alert_history.json
+        key: ${{ runner.os }}-alert-history-${{ github.run_id }}
